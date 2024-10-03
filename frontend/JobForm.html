@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar/Editar Vaga</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <form id="jobForm">
+        <h2 id="formTitle">Adicionar Vaga</h2>
+        <input type="text" id="title" placeholder="Título" required>
+        <input type="text" id="description" placeholder="Descrição" required>
+        <input type="text" id="company" placeholder="Empresa" required>
+        <input type="text" id="location" placeholder="Localização" required>
+        <button type="submit">Salvar Vaga</button>
+    </form>
+    <script src="app.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const jobId = urlParams.get("id");
+
+        if (jobId) {
+            document.getElementById("formTitle").innerText = "Editar Vaga";
+            fetchJob();
+        }
+
+        const fetchJob = async () => {
+            try {
+                const response = await fetch(`${API_URL}/jobs/${jobId}`, {
+                    headers: {
+                        "Authorization": `Bearer ${getToken()}`
+                    }
+                });
+
+                const job = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(job.message);
+                }
+
+                document.getElementById("title").value = job.title;
+                document.getElementById("description").value = job.description;
+                document.getElementById("company").value = job.company;
+                document.getElementById("location").value = job.location.coordinates.join(", "); // Ajuste conforme necessário
+            } catch (error) {
+                showError(error.message);
+            }
+        };
+
+        document.getElementById("jobForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+            const company = document.getElementById("company").value;
+            const location = document.getElementById("location").value;
+
+            try {
+                const method = jobId ? "PUT" : "POST"; // Usa PUT para edição e POST para adição
+                const response = await fetch(`${API_URL}/jobs${jobId ? '/' + jobId : ''}`, {
+                    method: method,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description,
+                        company,
+                        location: {
+                            type: "Point",
+                            coordinates: location.split(", ").map(coord => parseFloat(coord)) // Ajuste conforme necessário
+                        }
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message);
+                }
+
+                alert(jobId ? "Vaga atualizada com sucesso!" : "Vaga adicionada com sucesso!");
+                window.location.href = "jobs.html"; // Redireciona para a página de vagas
+            } catch (error) {
+                showError(error.message);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -6,16 +6,16 @@ export interface IJob extends Document {
     company: string;
     location: {
         type: {
-            type: String;
-            enum: ['Point'];
+            type: String,
+            enum: ['Point'],
         };
         coordinates: [number];
     };
 }
 
 const jobSchema = new Schema<IJob>({
-    title: { type: String, required: true },
-    description: { type: String, required: true },
+    title: { type: String, required: true, text: true },
+    description: { type: String, required: true, text: true },
     company: { type: String, required: true },
     location: {
         type: { type: String, required: true, enum: ['Point'] },
@@ -23,7 +23,7 @@ const jobSchema = new Schema<IJob>({
     },
 });
 
-jobSchema.index({ location: '2dsphere' });
+//cria indices de texto e geoespacial
+jobSchema.index({ title: 'text', description: 'text', location: '2dsphere' });
 
 export default mongoose.model<IJob>('Job', jobSchema);
-

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vagas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Vagas</h1>
+        <nav>
+            <a href="login.html" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Lista de Vagas</h2>
+        <ul id="jobList"></ul>
+        <button onclick="location.href='jobForm.html'">Adicionar Vaga</button>
+    </main>
+    <script src="app.js"></script>
+    <script>
+        const fetchJobs = async () => {
+            try {
+                const response = await fetch(`${API_URL}/jobs`, {
+                    headers: {
+                        "Authorization": `Bearer ${getToken()}`
+                    }
+                });
+
+                const jobs = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(jobs.message);
+                }
+
+                const jobList = document.getElementById("jobList");
+                jobList.innerHTML = ""; // Limpa a lista antes de adicionar os novos itens
+
+                jobs.forEach(job => {
+                    const li = document.createElement("li");
+                    li.innerHTML = `${job.title} - ${job.company} <a href="jobDetails.html?id=${job._id}">Detalhes</a>`;
+                    jobList.appendChild(li);
+                });
+            } catch (error) {
+                showError(error.message);
+            }
+        };
+
+        fetchJobs();
+    </script>
+</body>
+</html>

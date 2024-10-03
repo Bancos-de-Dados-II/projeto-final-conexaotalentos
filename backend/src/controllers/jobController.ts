@@ -2,16 +2,19 @@ import { Request, Response } from "express";
 import Job, { IJob } from "../models/Job";
 
 const jobController = {
+ 
   createJob: async (req: Request, res: Response) => {
+    console.log(req.body); // Verifique o que está sendo recebido
     try {
       const { title, description, company, location } = req.body;
       const job = new Job({ title, description, company, location });
       await job.save();
       res.status(201).json(job);
     } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
+        console.error("Erro ao criar vaga:", error); // Verifique erros
+        res.status(500).json({ message: (error as Error).message });
     }
-  },
+},
 
   getJobs: async (req: Request, res: Response) => {
     try {
